@@ -84,14 +84,12 @@ export function BillingClient() {
       if (data.url) {
         window.location.href = data.url
       } else {
-        console.error('[billing] no url returned:', data)
-        alert(data.error ?? 'Stripeへの接続に失敗しました。しばらくしてから再試行してください。')
         setUpgrading(false)
+        alert(data.error ?? 'Stripeへの接続に失敗しました')
       }
-    } catch (e) {
-      console.error('[billing] subscribe error:', e)
-      alert('エラーが発生しました。再試行してください。')
+    } catch (e: any) {
       setUpgrading(false)
+      alert('通信エラーが発生しました。再試行してください。')
     }
   }
 
