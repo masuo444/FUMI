@@ -60,6 +60,8 @@ const MARQUEE_ITEMS = [
   'Multi-language', 'Global Delivery', 'Members Only', 'Auto-translate',
 ]
 
+const LANG_FLAGS = ['🇯🇵', '🇺🇸', '🇩🇪', '🇫🇷', '🇰🇷', '🇨🇳', '+12']
+
 export default async function Home() {
   const [lang, supabaseResult] = await Promise.all([
     getLang(),
@@ -108,23 +110,105 @@ export default async function Home() {
       {/* ── Hero ── */}
       <section className="pt-[140px] pb-24 px-8 lg:px-12">
         <div className="max-w-[1400px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.6em] uppercase text-[#ccc] mb-10">
-            {tx(T.hero.label, lang)}
-          </p>
-          <h1 className="text-[76px] sm:text-[110px] lg:text-[136px] font-black leading-[0.88] tracking-[-0.04em] text-[#0a0a0a] whitespace-pre-line mb-12">
-            {tx(T.hero.title, lang)}
-          </h1>
-          <div className="border-t border-[#ebebeb] pt-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
-            <p className="text-[15px] text-[#777] leading-[1.85] max-w-[500px] whitespace-pre-line">
-              {tx(T.hero.sub, lang)}
-            </p>
-            <div className="flex flex-wrap gap-3 shrink-0">
-              <Link href="/login" className="px-7 py-3 text-[13px] font-semibold bg-[#0a0a0a] text-white hover:bg-[#333] transition-colors rounded-full">
-                {tx(T.hero.ctaTrial, lang)}
-              </Link>
-              <Link href="/pricing" className="px-7 py-3 text-[13px] font-semibold border border-[#ddd] text-[#666] hover:border-[#999] hover:text-[#0a0a0a] transition-colors rounded-full">
-                {tx(T.nav.pricing, lang)}
-              </Link>
+          <div className="grid lg:grid-cols-[1fr_420px] gap-16 items-center">
+
+            {/* Left: text */}
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.6em] uppercase text-[#ccc] mb-10">
+                {tx(T.hero.label, lang)}
+              </p>
+              <h1 className="text-[72px] sm:text-[100px] lg:text-[120px] font-black leading-[0.88] tracking-[-0.04em] text-[#0a0a0a] whitespace-pre-line mb-12">
+                {tx(T.hero.title, lang)}
+              </h1>
+              <div className="border-t border-[#ebebeb] pt-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
+                <p className="text-[15px] text-[#777] leading-[1.85] max-w-[460px] whitespace-pre-line">
+                  {tx(T.hero.sub, lang)}
+                </p>
+                <div className="flex flex-wrap gap-3 shrink-0">
+                  <Link href="/login" className="px-7 py-3 text-[13px] font-semibold bg-[#0a0a0a] text-white hover:bg-[#333] transition-colors rounded-full">
+                    {tx(T.hero.ctaTrial, lang)}
+                  </Link>
+                  <Link href="/pricing" className="px-7 py-3 text-[13px] font-semibold border border-[#ddd] text-[#666] hover:border-[#999] hover:text-[#0a0a0a] transition-colors rounded-full">
+                    {tx(T.nav.pricing, lang)}
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: newsletter mockup */}
+            <div className="hidden lg:flex flex-col gap-3">
+              {/* Main newsletter card */}
+              <div className="bg-white border border-[#e8e8e8] rounded-2xl overflow-hidden shadow-[0_4px_32px_rgba(0,0,0,0.08)]">
+                {/* Email top bar */}
+                <div className="bg-[#f7f7f7] border-b border-[#ebebeb] px-5 py-3 flex items-center gap-3">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-[#e0e0e0]" />
+                    <div className="w-3 h-3 rounded-full bg-[#e0e0e0]" />
+                    <div className="w-3 h-3 rounded-full bg-[#e0e0e0]" />
+                  </div>
+                  <div className="flex-1 bg-white border border-[#e8e8e8] rounded-full px-4 py-1 text-[10px] text-[#ccc]">
+                    newsletter@fumi.app
+                  </div>
+                </div>
+                {/* Email content */}
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-9 h-9 bg-[#0a0a0a] rounded-full flex items-center justify-center shrink-0">
+                      <span className="text-white text-[11px] font-black">F</span>
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-bold text-[#0a0a0a]">Fumi Newsletter</p>
+                      <p className="text-[10px] text-[#aaa]">terroir HUB · Vol.24</p>
+                    </div>
+                    <span className="ml-auto text-[9px] bg-[#0a0a0a] text-white px-2.5 py-1 rounded-full font-semibold tracking-wide">EN</span>
+                  </div>
+                  {/* Article image placeholder */}
+                  <div className="rounded-xl overflow-hidden mb-5 h-[120px]"
+                    style={{ background: 'linear-gradient(135deg, #1a0f00 0%, #2d1a00 40%, #3d2800 100%)' }}>
+                    <div className="h-full flex items-end p-4">
+                      <span className="text-[#d4a96a] font-black text-[22px] tracking-widest leading-none">terroir</span>
+                    </div>
+                  </div>
+                  {/* Article title */}
+                  <h4 className="text-[14px] font-bold text-[#0a0a0a] mb-3 leading-snug">
+                    {lang === 'ja' ? '日本酒の発酵文化が世界を繋ぐ' : 'How Japanese Sake Bridges Cultures Worldwide'}
+                  </h4>
+                  <div className="space-y-2 mb-5">
+                    <div className="h-[6px] bg-[#f2f2f2] rounded-full w-full" />
+                    <div className="h-[6px] bg-[#f2f2f2] rounded-full w-[88%]" />
+                    <div className="h-[6px] bg-[#f2f2f2] rounded-full w-[75%]" />
+                  </div>
+                  {/* Language badges */}
+                  <div className="border-t border-[#f5f5f5] pt-4">
+                    <p className="text-[9px] text-[#ccc] font-bold uppercase tracking-[0.3em] mb-2">
+                      {lang === 'ja' ? '配信言語' : 'Delivered in'}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {LANG_FLAGS.map((flag, i) => (
+                        <span key={i} className="text-[11px] bg-[#f7f7f7] border border-[#eeeeee] rounded-full px-2 py-0.5 leading-none">
+                          {flag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats strip */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-[#0a0a0a] rounded-xl p-4">
+                  <p className="text-[10px] text-white/30 mb-1 uppercase tracking-widest font-semibold">
+                    {lang === 'ja' ? '対応言語' : 'Languages'}
+                  </p>
+                  <p className="text-[22px] font-black text-white leading-none">24+</p>
+                </div>
+                <div className="bg-[#f7f7f7] border border-[#ebebeb] rounded-xl p-4">
+                  <p className="text-[10px] text-[#ccc] mb-1 uppercase tracking-widest font-semibold">
+                    {lang === 'ja' ? 'AI翻訳' : 'AI Translate'}
+                  </p>
+                  <p className="text-[22px] font-black text-[#0a0a0a] leading-none">Auto</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -158,7 +242,28 @@ export default async function Home() {
           <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#ebebeb]">
             {T.how.steps.map((item, i) => (
               <div key={item.step} className="px-0 sm:px-10 first:pl-0 last:pr-0 py-10 sm:py-0">
-                <p className="text-[80px] font-black text-[#f2f2f2] leading-none mb-6 tracking-tighter">
+                {/* Visual icon area */}
+                <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center mb-6">
+                  {i === 0 && (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M3 4h14M3 8h10M3 12h12M3 16h8" stroke="#0a0a0a" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                  {i === 1 && (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <circle cx="10" cy="10" r="7" stroke="#0a0a0a" strokeWidth="1.5"/>
+                      <path d="M10 3c0 0-3 3-3 7s3 7 3 7M10 3c0 0 3 3 3 7s-3 7-3 7M3 10h14" stroke="#0a0a0a" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                  {i === 2 && (
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <rect x="2" y="4" width="16" height="12" rx="2" stroke="#0a0a0a" strokeWidth="1.5"/>
+                      <path d="M2 8h16" stroke="#0a0a0a" strokeWidth="1.5"/>
+                      <path d="M6 12h4" stroke="#0a0a0a" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                </div>
+                <p className="text-[72px] font-black text-[#f2f2f2] leading-none mb-4 tracking-tighter">
                   {String(i + 1).padStart(2, '0')}
                 </p>
                 <h3 className="text-[17px] font-bold text-[#0a0a0a] mb-3 tracking-tight">
@@ -169,6 +274,44 @@ export default async function Home() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Translation visual strip ── */}
+      <section className="bg-[#0a0a0a] py-20 px-8 lg:px-12 overflow-hidden">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="grid lg:grid-cols-[1fr_1fr] gap-16 items-center">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.5em] uppercase text-white/30 mb-4">
+                {lang === 'ja' ? 'AI翻訳テクノロジー' : 'AI Translation'}
+              </p>
+              <h2 className="text-[36px] sm:text-[48px] font-black text-white tracking-[-0.03em] leading-[0.92] mb-6">
+                {lang === 'ja' ? '1記事が\n世界中の言語に。' : 'One article.\nEvery language.'}
+              </h2>
+              <p className="text-[14px] text-white/40 leading-relaxed max-w-md">
+                {lang === 'ja'
+                  ? 'Claude AIが記事のニュアンスを保ちながら24言語以上に自動翻訳。翻訳作業は一切不要です。'
+                  : 'Claude AI auto-translates your content into 24+ languages while preserving tone and nuance. No manual translation needed.'}
+              </p>
+            </div>
+            {/* Translation cards */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { flag: '🇯🇵', lang: '日本語', text: '日本酒は、米と水と麹で造られた芸術品です。' },
+                { flag: '🇺🇸', lang: 'English', text: 'Sake is a work of art crafted from rice, water, and koji.' },
+                { flag: '🇩🇪', lang: 'Deutsch', text: 'Sake ist ein Kunstwerk aus Reis, Wasser und Koji.' },
+                { flag: '🇫🇷', lang: 'Français', text: 'Le saké est une œuvre d\'art à base de riz, d\'eau et de koji.' },
+              ].map((item, i) => (
+                <div key={i} className={`rounded-xl p-4 border ${i === 0 ? 'border-white/20 bg-white/10' : 'border-white/[0.08] bg-white/[0.04]'}`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[16px]">{item.flag}</span>
+                    <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide">{item.lang}</span>
+                  </div>
+                  <p className="text-[11px] text-white/60 leading-relaxed">{item.text}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -185,21 +328,29 @@ export default async function Home() {
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            {T.forWho.cards.map((card) => (
+            {T.forWho.cards.map((card, i) => (
               <div key={card.label.ja}
-                className="bg-white border border-[#ebebeb] rounded-2xl p-10 hover:border-[#d0d0d0] hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-all duration-300">
-                <p className="text-[10px] font-bold tracking-[0.45em] uppercase text-[#ccc] mb-6">
-                  {tx(card.label, lang)}
-                </p>
-                <h3 className="text-[22px] font-bold text-[#0a0a0a] mb-4 leading-snug tracking-tight">
-                  {tx(card.title, lang)}
-                </h3>
-                <p className="text-[13px] text-[#777] leading-relaxed mb-5">
-                  {tx(card.body, lang)}
-                </p>
-                <p className="text-[11px] text-[#bbb] leading-relaxed border-t border-[#f0f0f0] pt-4">
-                  {tx(card.examples, lang)}
-                </p>
+                className="bg-white border border-[#ebebeb] rounded-2xl overflow-hidden hover:border-[#d0d0d0] hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-all duration-300">
+                {/* Visual header */}
+                <div className={`h-32 flex items-end p-6 ${i === 0
+                  ? 'bg-gradient-to-br from-[#0a0a0a] to-[#222]'
+                  : 'bg-gradient-to-br from-[#1a0f00] to-[#2d1a00]'
+                }`}>
+                  <p className="text-[10px] font-bold tracking-[0.45em] uppercase text-white/40">
+                    {tx(card.label, lang)}
+                  </p>
+                </div>
+                <div className="p-10">
+                  <h3 className="text-[22px] font-bold text-[#0a0a0a] mb-4 leading-snug tracking-tight">
+                    {tx(card.title, lang)}
+                  </h3>
+                  <p className="text-[13px] text-[#777] leading-relaxed mb-5">
+                    {tx(card.body, lang)}
+                  </p>
+                  <p className="text-[11px] text-[#bbb] leading-relaxed border-t border-[#f0f0f0] pt-4">
+                    {tx(card.examples, lang)}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -227,8 +378,8 @@ export default async function Home() {
                   {salon.image ? (
                     <Image src={salon.image} alt={salon.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center" style={{ background: salon.fallbackBg }}>
-                      <span className="font-black text-xl tracking-widest select-none" style={{ color: salon.fallbackColor }}>
+                    <div className="w-full h-full flex items-end p-5" style={{ background: salon.fallbackBg }}>
+                      <span className="font-black text-lg tracking-widest select-none" style={{ color: salon.fallbackColor }}>
                         {salon.fallbackText}
                       </span>
                     </div>
@@ -258,11 +409,11 @@ export default async function Home() {
               return (
                 <Link key={salon.id} href={`/salon/${salon.id}`}
                   className="group block rounded-xl overflow-hidden border border-[#ebebeb] bg-white hover:border-[#ccc] hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)] transition-all duration-300">
-                  <div className="relative h-52 flex items-center justify-center" style={{ background: bgs[i % bgs.length] }}>
+                  <div className="relative h-52 flex items-end p-5" style={{ background: bgs[i % bgs.length] }}>
                     {salon.hero_image_url ? (
                       <Image src={salon.hero_image_url} alt={salon.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <span className="font-black text-3xl text-white/30 select-none">{salon.name.slice(0, 2)}</span>
+                      <span className="font-black text-xl text-white/30 select-none">{salon.name.slice(0, 2)}</span>
                     )}
                   </div>
                   <div className="p-5">
