@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_CREDITS_WEBHOOK_SECRET!)
   } catch {
     return NextResponse.json({ error: 'Webhook signature failed' }, { status: 400 })
   }
