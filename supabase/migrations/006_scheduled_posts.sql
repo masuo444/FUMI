@@ -1,3 +1,6 @@
+-- Add 'scheduled' to post_status enum
+ALTER TYPE post_status ADD VALUE IF NOT EXISTS 'scheduled';
+
 -- Add scheduled_at column to posts for scheduled publishing
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMPTZ;
 
