@@ -17,7 +17,6 @@ interface PostItem {
   cover_image_url: string | null
   published_at: string | null
   created_at: string
-  scheduled_at?: string | null
   post_translations: { language_code: string; title: string; status: TranslationStatus }[]
   salons: { name: string } | null
 }
@@ -31,7 +30,7 @@ export function PostsListClient({
 }) {
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'scheduled'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published'>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
@@ -83,7 +82,6 @@ export function PostsListClient({
             { value: 'all', label: 'すべて' },
             { value: 'published', label: '公開済み' },
             { value: 'draft', label: '下書き' },
-            { value: 'scheduled', label: '予約' },
           ] as const).map(({ value, label }) => (
             <button
               key={value}
@@ -139,9 +137,6 @@ export function PostsListClient({
                 <p className="text-sm font-medium truncate">{title}</p>
                 <p className="text-xs text-gray-400 mt-0.5">
                   {post.salons?.name} · {formatDate(post.created_at)}
-                  {post.status === 'scheduled' && post.scheduled_at && (
-                    <span className="ml-2 text-indigo-500">⏰ {new Date(post.scheduled_at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}公開</span>
-                  )}
                 </p>
               </div>
 
@@ -205,7 +200,6 @@ export function PostsListClient({
 
 function StatusBadge({ status }: { status: PostStatus }) {
   if (status === 'published') return <Badge variant="success">公開済み</Badge>
-  if (status === 'scheduled') return <Badge variant="warning">予約</Badge>
   return <Badge variant="muted">下書き</Badge>
 }
 

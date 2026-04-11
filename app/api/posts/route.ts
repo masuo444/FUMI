@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
   // For admin editing another owner's post, the post's actual owner handles the wallet.
   if (!owner && !isAdmin) return NextResponse.json({ error: 'Owner not found' }, { status: 404 })
 
-  const body: CreatePostRequest & { id?: string; manual_translation?: { title: string; body: string }; newsletter_only?: boolean; scheduled_at?: string | null } = await request.json()
-  const { title, body: postBody, original_language, salon_id, cover_image_url, status, send_notification, id, manual_translation, newsletter_only, scheduled_at } = body
+  const body: CreatePostRequest & { id?: string; manual_translation?: { title: string; body: string }; newsletter_only?: boolean } = await request.json()
+  const { title, body: postBody, original_language, salon_id, cover_image_url, status, send_notification, id, manual_translation, newsletter_only } = body
 
   if (!['ja', 'en'].includes(original_language)) {
     return NextResponse.json({ error: 'Invalid original_language' }, { status: 400 })
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       status,
       send_notification,
       published_at: status === 'published' ? new Date().toISOString() : null,
-      scheduled_at: status === 'scheduled' ? scheduled_at : null,
+
     }).eq('id', postId)
     if (!isAdmin) updateQuery.eq('owner_id', effectiveOwner!.id)
     const { error } = await updateQuery
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       status,
       send_notification,
       published_at: status === 'published' ? new Date().toISOString() : null,
-      scheduled_at: status === 'scheduled' ? scheduled_at : null,
+
     }).select().single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     postId = newPost.id

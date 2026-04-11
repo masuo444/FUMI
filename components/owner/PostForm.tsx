@@ -17,7 +17,6 @@ interface PostFormProps {
     status: PostStatus
     send_notification: boolean
     salon_id: string
-    scheduled_at?: string | null
   }
   salons: Array<{ id: string; name: string }>
   defaultSalonId?: string
@@ -56,8 +55,6 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Scheduled publish
-  const [scheduledAt, setScheduledAt] = useState(initialData?.scheduled_at ?? '')
 
   function autoResize(ref: React.RefObject<HTMLTextAreaElement | null>) {
     const el = ref.current
@@ -211,10 +208,7 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
       setError('両言語モードでは、もう一方の言語のタイトルと本文も入力してください')
       return
     }
-    if (status === 'scheduled' && !scheduledAt) {
-      setError('公開日時を設定してください')
-      return
-    }
+
     setSaving(true)
     setError('')
     try {
@@ -228,7 +222,7 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
         status,
         send_notification: newsletterOnly ? true : sendNotif,
         newsletter_only: newsletterOnly,
-        scheduled_at: status === 'scheduled' ? scheduledAt : null,
+
       }
       if (bilingualMode && title2.trim() && body2.trim()) {
         payload.manual_translation = { title: title2.trim(), body: body2.trim() }
@@ -490,31 +484,6 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
             />
             <span className="text-sm text-gray-600">公開時に会員へ通知メールを送る</span>
           </label>
-
-          {/* Scheduled publish */}
-          <div className="flex items-center gap-3">
-            <label className="text-sm text-gray-600 shrink-0">スケジュール公開</label>
-            <input
-              type="datetime-local"
-              value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
-              min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
-              className="text-sm border border-gray-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-gray-400 text-gray-700"
-            />
-            {scheduledAt && (
-              <button
-                type="button"
-                onClick={() => submit('scheduled')}
-                disabled={saving}
-                className="px-4 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50"
-              >
-                ⏰ 予約公開
-              </button>
-            )}
-            {scheduledAt && (
-              <button type="button" onClick={() => setScheduledAt('')} className="text-xs text-gray-400 hover:text-gray-600">クリア</button>
-            )}
-          </div>
 
           {/* Translation estimate */}
           {!bilingualMode && estimate && (
