@@ -14,13 +14,11 @@ export default async function GpsRunnerPage() {
   const supabase = await createServiceClient()
   const { data: salon } = await supabase
     .from('salons')
-    .select('id, invite_code, payment_url, hero_image_url')
+    .select('id, hero_image_url')
     .eq('name', 'GPS RUNNER SUPPORTERS')
     .maybeSingle()
 
   const salonId = salon?.id
-  const hasInviteCode = !!(salon as any)?.invite_code
-  const paymentUrl = salon?.payment_url
   const heroImageUrl = (salon as any)?.hero_image_url ?? null
 
   return (
@@ -63,24 +61,14 @@ export default async function GpsRunnerPage() {
                 >
                   会員ログイン →
                 </Link>
-                {hasInviteCode && (
-                  <Link
-                    href={`/salon/${salonId}/join`}
-                    className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 text-white text-sm font-semibold hover:border-white/50 transition-colors"
-                  >
-                    招待コードで参加
-                  </Link>
-                )}
-                {!hasInviteCode && paymentUrl && (
-                  <a
-                    href={paymentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 text-white text-sm font-semibold hover:border-white/50 transition-colors"
-                  >
-                    会員登録はこちら →
-                  </a>
-                )}
+                <a
+                  href="https://official.gps-run.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 text-white text-sm font-semibold hover:border-white/50 transition-colors"
+                >
+                  入会はこちら →
+                </a>
               </div>
             )}
           </div>
