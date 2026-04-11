@@ -64,7 +64,6 @@ export default async function Home() {
   const { data: salons } = supabaseResult
   const dynamicSalons = (salons ?? []).filter((s) => !FIXED_NAMES.includes(s.name))
 
-  // Inject hero images from DB into fixed salons
   const fixedWithImages = FIXED_SALONS.map((fs) => {
     const dbSalon = (salons ?? []).find((s) => s.name === fs.name)
     return { ...fs, image: dbSalon?.hero_image_url ?? null }
@@ -82,7 +81,7 @@ export default async function Home() {
           <nav className="flex items-center gap-7 text-sm">
             <a href="#how" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.how, lang)}</a>
             <a href="#channels" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.channels, lang)}</a>
-            <a href="#pricing" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.pricing, lang)}</a>
+            <Link href="/pricing" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.pricing, lang)}</Link>
             <Link href="/my/login" className="text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.signin, lang)}</Link>
             <Link href="/login" className="px-5 py-2.5 text-sm font-semibold bg-[#111] text-white hover:bg-[#333] transition-colors rounded-full">
               {tx(T.nav.start, lang)}
@@ -115,43 +114,29 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── Stats strip ── */}
-      <div className="border-t border-b border-[#F0F0F0] bg-[#FAFAFA]">
-        <div className="max-w-7xl mx-auto px-8 py-10 grid grid-cols-3 divide-x divide-[#EBEBEB]">
-          {[
-            { num: lang === 'ja' ? '5日間' : '5 days',   label: lang === 'ja' ? '無料トライアル' : 'Free trial' },
-            { num: '$10',                                  label: lang === 'ja' ? '月額（税込）' : 'per month' },
-            { num: lang === 'ja' ? '∞' : '∞',            label: lang === 'ja' ? '会員・チャンネル数' : 'Members & channels' },
-          ].map((stat) => (
-            <div key={stat.label} className="px-8 first:pl-0 last:pr-0">
-              <p className="text-3xl font-bold text-[#111] mb-1">{stat.num}</p>
-              <p className="text-xs text-[#AAA]">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ── How it works ── */}
-      <section id="how" className="max-w-7xl mx-auto px-8 py-28">
-        <div className="mb-16">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.how.label, lang)}</p>
-          <h2 className="text-4xl font-bold tracking-tight text-[#111]">{tx(T.how.title, lang)}</h2>
-        </div>
-        <div className="grid sm:grid-cols-3 gap-8">
-          {T.how.steps.map((item, i) => (
-            <div key={item.step} className="group">
-              <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center text-xs font-bold text-[#AAA] mb-6">
-                {String(i + 1).padStart(2, '0')}
+      <section id="how" className="border-t border-[#F0F0F0] bg-[#F8F8F8]">
+        <div className="max-w-7xl mx-auto px-8 py-28">
+          <div className="mb-16">
+            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.how.label, lang)}</p>
+            <h2 className="text-4xl font-bold tracking-tight text-[#111]">{tx(T.how.title, lang)}</h2>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-8">
+            {T.how.steps.map((item, i) => (
+              <div key={item.step}>
+                <div className="w-10 h-10 rounded-full bg-white border border-[#E8E8E8] flex items-center justify-center text-xs font-bold text-[#AAA] mb-6">
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <h3 className="text-xl font-bold text-[#111] mb-3">{tx(item.title, lang)}</h3>
+                <p className="text-sm text-[#888] leading-relaxed">{tx(item.body, lang)}</p>
               </div>
-              <h3 className="text-xl font-bold text-[#111] mb-3">{tx(item.title, lang)}</h3>
-              <p className="text-sm text-[#888] leading-relaxed">{tx(item.body, lang)}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── For who ── */}
-      <section className="bg-[#F8F8F8] border-t border-[#F0F0F0]">
+      <section className="border-t border-[#F0F0F0]">
         <div className="max-w-7xl mx-auto px-8 py-28">
           <div className="mb-16">
             <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.forWho.label, lang)}</p>
@@ -159,7 +144,7 @@ export default async function Home() {
           </div>
           <div className="grid sm:grid-cols-2 gap-6">
             {T.forWho.cards.map((card) => (
-              <div key={card.label.ja} className="bg-white border border-[#EBEBEB] p-10 rounded-2xl">
+              <div key={card.label.ja} className="bg-[#F8F8F8] border border-[#EBEBEB] p-10 rounded-2xl">
                 <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-[#BBB] mb-6">{tx(card.label, lang)}</p>
                 <h3 className="text-xl font-bold text-[#111] mb-4 leading-snug">{tx(card.title, lang)}</h3>
                 <p className="text-sm text-[#888] leading-relaxed mb-6">{tx(card.body, lang)}</p>
@@ -171,105 +156,61 @@ export default async function Home() {
       </section>
 
       {/* ── Channels ── */}
-      <section id="channels" className="max-w-7xl mx-auto px-8 py-28">
-        <div className="mb-16">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.channels.label, lang)}</p>
-          <h2 className="text-4xl font-bold tracking-tight text-[#111]">{tx(T.channels.title, lang)}</h2>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {fixedWithImages.map((salon) => (
-            <Link key={salon.key} href={salon.href}
-              className="group block rounded-2xl overflow-hidden border border-[#EBEBEB] hover:border-[#CCC] hover:shadow-xl transition-all duration-300">
-              {/* Card image */}
-              <div className="relative h-48 overflow-hidden">
-                {salon.image ? (
-                  <Image
-                    src={salon.image}
-                    alt={salon.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center"
-                    style={{ background: salon.fallbackBg }}>
-                    <span className="font-bold text-2xl tracking-widest select-none"
-                      style={{ color: salon.fallbackColor }}>
-                      {salon.fallbackText}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {/* Card body */}
-              <div className="p-6 bg-white">
-                <p className="text-[10px] font-semibold tracking-[0.25em] uppercase text-[#BBB] mb-2">{tx(salon.tagline, lang)}</p>
-                <h3 className="text-sm font-bold text-[#111] leading-snug mb-2">{salon.name}</h3>
-                <p className="text-xs text-[#999] leading-relaxed line-clamp-2">{tx(salon.description, lang)}</p>
-                <div className="mt-4 flex items-center text-xs font-semibold text-[#111] group-hover:gap-2 gap-1 transition-all">
-                  <span>{lang === 'ja' ? '詳しく見る' : 'Learn more'}</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-          {dynamicSalons.map((salon, i) => {
-            const bgs = ['linear-gradient(135deg,#1e1e2e,#2d2b55)', 'linear-gradient(135deg,#1a2035,#243050)', 'linear-gradient(135deg,#1e2a1e,#2a402a)']
-            return (
-              <Link key={salon.id} href={`/salon/${salon.id}`}
-                className="group block rounded-2xl overflow-hidden border border-[#EBEBEB] hover:border-[#CCC] hover:shadow-xl transition-all duration-300">
-                <div className="relative h-48 flex items-center justify-center"
-                  style={{ background: bgs[i % bgs.length] }}>
-                  {salon.hero_image_url ? (
-                    <Image src={salon.hero_image_url} alt={salon.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+      <section id="channels" className="border-t border-[#F0F0F0] bg-[#F8F8F8]">
+        <div className="max-w-7xl mx-auto px-8 py-28">
+          <div className="mb-16">
+            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.channels.label, lang)}</p>
+            <h2 className="text-4xl font-bold tracking-tight text-[#111]">{tx(T.channels.title, lang)}</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {fixedWithImages.map((salon) => (
+              <Link key={salon.key} href={salon.href}
+                className="group block rounded-2xl overflow-hidden border border-[#EBEBEB] bg-white hover:border-[#CCC] hover:shadow-xl transition-all duration-300">
+                <div className="relative h-48 overflow-hidden">
+                  {salon.image ? (
+                    <Image src={salon.image} alt={salon.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <span className="font-bold text-3xl text-white/50 select-none">{salon.name.slice(0, 2)}</span>
+                    <div className="w-full h-full flex items-center justify-center" style={{ background: salon.fallbackBg }}>
+                      <span className="font-bold text-2xl tracking-widest select-none" style={{ color: salon.fallbackColor }}>
+                        {salon.fallbackText}
+                      </span>
+                    </div>
                   )}
                 </div>
-                <div className="p-6 bg-white">
-                  <h3 className="text-sm font-bold text-[#111] mb-2">{salon.name}</h3>
-                  {salon.description && <p className="text-xs text-[#999] line-clamp-2">{salon.description}</p>}
-                  <div className="mt-4 flex items-center text-xs font-semibold text-[#111] gap-1">
+                <div className="p-6">
+                  <p className="text-[10px] font-semibold tracking-[0.25em] uppercase text-[#BBB] mb-2">{tx(salon.tagline, lang)}</p>
+                  <h3 className="text-sm font-bold text-[#111] leading-snug mb-2">{salon.name}</h3>
+                  <p className="text-xs text-[#999] leading-relaxed line-clamp-2">{tx(salon.description, lang)}</p>
+                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[#111]">
                     <span>{lang === 'ja' ? '詳しく見る' : 'Learn more'}</span>
                     <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
                 </div>
               </Link>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* ── Pricing ── */}
-      <section id="pricing" className="bg-[#F8F8F8] border-t border-[#F0F0F0]">
-        <div className="max-w-7xl mx-auto px-8 py-28">
-          <div className="mb-16">
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.pricing.label, lang)}</p>
-            <h2 className="text-4xl font-bold tracking-tight text-[#111]">{tx(T.pricing.title, lang)}</h2>
-          </div>
-          <div className="max-w-sm">
-            <div className="bg-white border border-[#EBEBEB] rounded-2xl p-10 shadow-sm">
-              <div className="flex items-end gap-2 mb-2">
-                <span className="text-6xl font-bold text-[#111]">$10</span>
-                <span className="text-[#BBB] text-sm mb-2">/ {lang === 'ja' ? '月' : 'month'}</span>
-              </div>
-              <p className="text-[#BBB] text-sm mb-8">{tx(T.pricing.trialNote, lang)}</p>
-              <div className="border-t border-[#F0F0F0] pt-8 mb-8">
-                <ul className="space-y-4">
-                  {T.pricing.features.map((f) => (
-                    <li key={f.ja} className="flex items-center gap-3 text-sm text-[#555]">
-                      <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center shrink-0">
-                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                          <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                      {tx(f, lang)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <Link href="/login" className="block text-center py-4 text-sm font-semibold bg-[#111] text-white hover:bg-[#333] transition-colors rounded-full">
-                {tx(T.pricing.cta, lang)}
-              </Link>
-            </div>
+            ))}
+            {dynamicSalons.map((salon, i) => {
+              const bgs = ['linear-gradient(135deg,#1e1e2e,#2d2b55)', 'linear-gradient(135deg,#1a2035,#243050)', 'linear-gradient(135deg,#1e2a1e,#2a402a)']
+              return (
+                <Link key={salon.id} href={`/salon/${salon.id}`}
+                  className="group block rounded-2xl overflow-hidden border border-[#EBEBEB] bg-white hover:border-[#CCC] hover:shadow-xl transition-all duration-300">
+                  <div className="relative h-48 flex items-center justify-center" style={{ background: bgs[i % bgs.length] }}>
+                    {salon.hero_image_url ? (
+                      <Image src={salon.hero_image_url} alt={salon.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <span className="font-bold text-3xl text-white/50 select-none">{salon.name.slice(0, 2)}</span>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-sm font-bold text-[#111] mb-2">{salon.name}</h3>
+                    {salon.description && <p className="text-xs text-[#999] line-clamp-2">{salon.description}</p>}
+                    <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[#111]">
+                      <span>{lang === 'ja' ? '詳しく見る' : 'Learn more'}</span>
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -278,10 +219,15 @@ export default async function Home() {
       <section className="bg-[#111] text-white">
         <div className="max-w-7xl mx-auto px-8 py-32 text-center">
           <h2 className="text-5xl sm:text-7xl font-bold tracking-[-0.03em] mb-6">{tx(T.bottomCta.title, lang)}</h2>
-          <p className="text-base text-white/40 mb-12">{tx(T.bottomCta.sub, lang)}</p>
-          <Link href="/login" className="inline-block px-10 py-4 text-sm font-semibold bg-white text-[#111] hover:bg-[#F0F0F0] transition-colors rounded-full">
-            {tx(T.bottomCta.button, lang)}
-          </Link>
+          <p className="text-base text-white/40 mb-10">{tx(T.bottomCta.sub, lang)}</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/login" className="px-10 py-4 text-sm font-semibold bg-white text-[#111] hover:bg-[#F0F0F0] transition-colors rounded-full">
+              {tx(T.bottomCta.button, lang)}
+            </Link>
+            <Link href="/pricing" className="px-10 py-4 text-sm font-semibold border border-white/20 text-white/60 hover:border-white/40 hover:text-white transition-colors rounded-full">
+              {tx(T.nav.pricing, lang)}
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -295,6 +241,7 @@ export default async function Home() {
           <div className="flex gap-8 text-sm text-white/40">
             <Link href="/my/login" className="hover:text-white transition-colors">{tx(T.footer.memberLogin, lang)}</Link>
             <Link href="/login" className="hover:text-white transition-colors">{tx(T.footer.ownerLogin, lang)}</Link>
+            <Link href="/pricing" className="hover:text-white transition-colors">{tx(T.nav.pricing, lang)}</Link>
           </div>
           <span className="text-white/20 text-xs">© 2026 Fumi</span>
         </div>
