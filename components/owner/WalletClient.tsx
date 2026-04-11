@@ -31,17 +31,21 @@ export function WalletClient({
     }
     setLoading(true)
     setError('')
-    const res = await fetch('/api/stripe/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount }),
-    })
-    if (res.ok) {
-      const { url } = await res.json()
-      window.location.href = url
-    } else {
-      const { error } = await res.json()
-      setError(error)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+      })
+      const data = await res.json()
+      if (res.ok && data.url) {
+        window.location.href = data.url
+      } else {
+        setError(data.error ?? 'Stripeへの接続に失敗しました')
+        setLoading(false)
+      }
+    } catch (e) {
+      setError('エラーが発生しました。再試行してください。')
       setLoading(false)
     }
   }

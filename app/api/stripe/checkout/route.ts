@@ -18,13 +18,17 @@ export async function POST(request: NextRequest) {
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  const url = await createCheckoutSession({
-    ownerId: owner.id,
-    ownerEmail: owner.email,
-    amountUsd: amount,
-    successUrl: `${appUrl}/wallet?charged=1`,
-    cancelUrl: `${appUrl}/wallet`,
-  })
-
-  return NextResponse.json({ url })
+  try {
+    const url = await createCheckoutSession({
+      ownerId: owner.id,
+      ownerEmail: owner.email,
+      amountUsd: amount,
+      successUrl: `${appUrl}/wallet?charged=1`,
+      cancelUrl: `${appUrl}/wallet`,
+    })
+    return NextResponse.json({ url })
+  } catch (e: any) {
+    console.error('[stripe/checkout]', e)
+    return NextResponse.json({ error: e?.message ?? 'Stripe error' }, { status: 500 })
+  }
 }
