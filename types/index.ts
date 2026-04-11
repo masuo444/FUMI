@@ -3,7 +3,7 @@
 // ============================================================
 export type MemberStatus = 'active' | 'inactive'
 export type PreferredLanguage = 'ja' | 'en'
-export type PostStatus = 'draft' | 'published'
+export type PostStatus = 'draft' | 'published' | 'scheduled'
 export type LanguageCode = 'ja' | 'en'
 export type TranslationStatus = 'completed' | 'pending_insufficient_balance' | 'failed'
 export type NotificationStatus = 'pending' | 'sent' | 'failed'

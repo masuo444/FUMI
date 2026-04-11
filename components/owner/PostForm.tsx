@@ -1,10 +1,11 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
 import { formatCurrency } from '@/lib/utils'
 import { LanguageCode, TranslationEstimate, PostStatus } from '@/types'
+import { marked } from 'marked'
 
 interface PostFormProps {
   postId?: string
@@ -16,20 +17,22 @@ interface PostFormProps {
     status: PostStatus
     send_notification: boolean
     salon_id: string
+    scheduled_at?: string | null
   }
   salons: Array<{ id: string; name: string }>
   defaultSalonId?: string
   currentBalance: number
 }
 
+// Configure marked
+marked.setOptions({ breaks: true })
+
 export function PostForm({ postId, initialData, salons, defaultSalonId, currentBalance }: PostFormProps) {
   const router = useRouter()
   const bodyRef = useRef<HTMLTextAreaElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
-  const [salonId, setSalonId] = useState(
-    initialData?.salon_id ?? defaultSalonId ?? salons[0]?.id ?? ''
-  )
+  const [salonId, setSalonId] = useState(initialData?.salon_id ?? defaultSalonId ?? salons[0]?.id ?? '')
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [body, setBody] = useState(initialData?.body ?? '')
   const [originalLang, setOriginalLang] = useState<LanguageCode>(initialData?.original_language ?? 'ja')
@@ -40,32 +43,70 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
   const [error, setError] = useState('')
   const [estimate, setEstimate] = useState<TranslationEstimate | null>(null)
 
-  // Bilingual mode — user inputs both JA+EN manually (no token deduction)
+  // Preview mode
+  const [previewMode, setPreviewMode] = useState(false)
+
+  // Bilingual mode
   const [bilingualMode, setBilingualMode] = useState(false)
   const [title2, setTitle2] = useState('')
   const [body2, setBody2] = useState('')
   const body2Ref = useRef<HTMLTextAreaElement>(null)
 
-  function autoResize2() {
-    const el = body2Ref.current
+  // Auto-save state
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Scheduled publish
+  const [scheduledAt, setScheduledAt] = useState(initialData?.scheduled_at ?? '')
+
+  function autoResize(ref: React.RefObject<HTMLTextAreaElement | null>) {
+    const el = ref.current
     if (!el) return
     el.style.height = 'auto'
     el.style.height = el.scrollHeight + 'px'
   }
 
-  useEffect(() => { autoResize2() }, [body2])
+  useEffect(() => { autoResize(bodyRef) }, [body])
+  useEffect(() => { autoResize(body2Ref) }, [body2])
 
-  // Auto-resize body textarea
-  function autoResize() {
-    const el = bodyRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = el.scrollHeight + 'px'
-  }
+  // ── Auto-save ─────────────────────────────────────────────────
+  const doAutoSave = useCallback(async () => {
+    if (!title.trim() || !body.trim() || !salonId) return
+    setAutoSaveStatus('saving')
+    try {
+      const payload: Record<string, unknown> = {
+        id: postId,
+        salon_id: salonId,
+        original_language: originalLang,
+        title,
+        body,
+        cover_image_url: coverUrl || undefined,
+        status: 'draft',
+        send_notification: false,
+      }
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (res.ok) setAutoSaveStatus('saved')
+      else setAutoSaveStatus('idle')
+    } catch {
+      setAutoSaveStatus('idle')
+    }
+  }, [postId, salonId, originalLang, title, body, coverUrl])
 
-  useEffect(() => { autoResize() }, [body])
+  // Trigger auto-save 3s after last keystroke (draft only, not if already published)
+  useEffect(() => {
+    if (initialData?.status === 'published') return
+    if (!title && !body) return
+    setAutoSaveStatus('idle')
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+    autoSaveTimerRef.current = setTimeout(() => { doAutoSave() }, 3000)
+    return () => { if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current) }
+  }, [title, body, coverUrl])  // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Debounced translation estimate (only when NOT in bilingual mode)
+  // Debounced translation estimate
   useEffect(() => {
     if (bilingualMode || (!title && !body)) return
     const t = setTimeout(async () => {
@@ -81,8 +122,8 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
     return () => clearTimeout(t)
   }, [title, body, bilingualMode])
 
-  // ── Toolbar actions ────────────────────────────────────────────
-  function insertAtCursor(before: string, after: string, placeholder = '') {
+  // ── Toolbar helpers ────────────────────────────────────────────
+  function insertAtCursor(before: string, after = '', placeholder = '') {
     const el = bodyRef.current
     if (!el) return
     const start = el.selectionStart
@@ -90,7 +131,6 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
     const selected = body.slice(start, end) || placeholder
     const newBody = body.slice(0, start) + before + selected + after + body.slice(end)
     setBody(newBody)
-    // restore cursor
     setTimeout(() => {
       el.focus()
       const pos = start + before.length + selected.length + after.length
@@ -98,14 +138,37 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
     }, 0)
   }
 
-  function handleBold() {
+  function insertLinePrefix(prefix: string) {
+    const el = bodyRef.current
+    if (!el) return
+    const start = el.selectionStart
+    const lineStart = body.lastIndexOf('\n', start - 1) + 1
+    const newBody = body.slice(0, lineStart) + prefix + body.slice(lineStart)
+    setBody(newBody)
+    setTimeout(() => { el.focus() }, 0)
+  }
+
+  function handleBold() { insertAtCursor('**', '**', 'テキスト') }
+  function handleH2() { insertLinePrefix('## ') }
+  function handleH3() { insertLinePrefix('### ') }
+  function handleBullet() { insertLinePrefix('- ') }
+  function handleNumbered() { insertLinePrefix('1. ') }
+  function handleQuote() { insertLinePrefix('> ') }
+  function handleHr() {
+    const el = bodyRef.current
+    if (!el) return
+    const pos = el.selectionStart
+    const newBody = body.slice(0, pos) + '\n---\n' + body.slice(pos)
+    setBody(newBody)
+  }
+  function handleLink() {
     const el = bodyRef.current
     if (!el) return
     const selected = body.slice(el.selectionStart, el.selectionEnd)
     if (selected) {
-      insertAtCursor('**', '**')
+      insertAtCursor('[', '](https://)')
     } else {
-      insertAtCursor('**', '**', 'テキスト')
+      insertAtCursor('[リンクテキスト](', ')', 'https://')
     }
   }
 
@@ -139,13 +202,17 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
     }
   }
 
-  // ── Submit ────────────────────────────────────────────────────
+  // ── Submit ─────────────────────────────────────────────────────
   async function submit(status: PostStatus, newsletterOnly = false) {
     if (!salonId) { setError('サロンを選択してください'); return }
     if (!title.trim()) { setError('タイトルを入力してください'); return }
     if (!body.trim()) { setError('本文を入力してください'); return }
     if (bilingualMode && (!title2.trim() || !body2.trim())) {
       setError('両言語モードでは、もう一方の言語のタイトルと本文も入力してください')
+      return
+    }
+    if (status === 'scheduled' && !scheduledAt) {
+      setError('公開日時を設定してください')
       return
     }
     setSaving(true)
@@ -161,6 +228,7 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
         status,
         send_notification: newsletterOnly ? true : sendNotif,
         newsletter_only: newsletterOnly,
+        scheduled_at: status === 'scheduled' ? scheduledAt : null,
       }
       if (bilingualMode && title2.trim() && body2.trim()) {
         payload.manual_translation = { title: title2.trim(), body: body2.trim() }
@@ -182,11 +250,13 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
     }
   }
 
+  const previewHtml = marked(body || '') as string
+
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Sticky top bar ───────────────────────────────────────── */}
+      {/* ── Sticky top bar ── */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100">
-        <div className="max-w-2xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between gap-3">
           {/* Salon selector */}
           <select
             value={salonId}
@@ -198,8 +268,14 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
             ))}
           </select>
 
-          <div className="flex items-center gap-2">
-            {/* Language */}
+          {/* Auto-save status */}
+          <span className="text-xs text-gray-400 shrink-0 hidden sm:block">
+            {autoSaveStatus === 'saving' && '保存中…'}
+            {autoSaveStatus === 'saved' && '✓ 自動保存済み'}
+          </span>
+
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Language toggle */}
             <div className="flex rounded-md border border-gray-200 overflow-hidden text-sm">
               {(['ja', 'en'] as LanguageCode[]).map((lang) => (
                 <button
@@ -207,9 +283,7 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
                   type="button"
                   onClick={() => setOriginalLang(lang)}
                   className={`px-3 py-1.5 transition-colors ${
-                    originalLang === lang
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white text-gray-500 hover:bg-gray-50'
+                    originalLang === lang ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
                   }`}
                 >
                   {lang === 'ja' ? 'JA' : 'EN'}
@@ -217,22 +291,34 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
               ))}
             </div>
 
+            {/* Preview toggle */}
+            <button
+              type="button"
+              onClick={() => setPreviewMode((v) => !v)}
+              className={`px-3 py-1.5 text-sm border rounded-md transition-colors ${
+                previewMode
+                  ? 'bg-gray-900 text-white border-gray-900'
+                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {previewMode ? '編集' : 'プレビュー'}
+            </button>
+
             <button
               type="button"
               onClick={() => submit('draft')}
               disabled={saving || uploading}
               className="px-4 py-1.5 text-sm text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              {saving ? '保存中…' : '下書き保存'}
+              {saving ? '保存中…' : '下書き'}
             </button>
             <button
               type="button"
               onClick={() => submit('draft', true)}
               disabled={saving || uploading}
-              title="記事を公開せずメールだけ送る"
               className="px-4 py-1.5 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50"
             >
-              📨 メルマガ送信
+              📨 メルマガ
             </button>
             <button
               type="button"
@@ -246,8 +332,8 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
         </div>
       </div>
 
-      {/* ── Editor area ──────────────────────────────────────────── */}
-      <div className="max-w-2xl mx-auto px-6 pb-32">
+      {/* ── Editor / Preview area ── */}
+      <div className="max-w-3xl mx-auto px-6 pb-32">
 
         {/* Cover image */}
         <div className="mt-8 mb-6">
@@ -291,62 +377,81 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
           }}
         />
 
-        {/* Formatting toolbar */}
-        <div className="flex items-center gap-1 mb-4 pb-3 border-b border-gray-100">
-          <ToolbarButton
-            onClick={handleBold}
-            title="太文字 (⌘B)"
-            label={<span className="font-bold text-base">B</span>}
-          />
-          <ToolbarButton
-            onClick={() => imageInputRef.current?.click()}
-            title="画像を挿入"
-            label={
-              uploading
-                ? <span className="text-xs">...</span>
-                : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            }
-          />
-          <input
-            ref={imageInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageInsert(f) }}
-          />
-          <div className="flex-1" />
-          <button
-            type="button"
-            onClick={() => setBilingualMode((v) => !v)}
-            title="日英両方を手動入力（トークン不要）"
-            className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
-              bilingualMode
-                ? 'bg-gray-900 text-white border-gray-900'
-                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
-            }`}
-          >
-            {bilingualMode ? '両言語モード ON' : '両言語で入力'}
-          </button>
-        </div>
+        {!previewMode && (
+          /* ── Formatting toolbar ── */
+          <div className="flex items-center gap-0.5 mb-4 pb-3 border-b border-gray-100 flex-wrap">
+            <ToolbarButton onClick={handleBold} title="太文字 (⌘B)" label={<b>B</b>} />
+            <ToolbarButton onClick={handleH2} title="見出し2" label={<span className="text-xs font-bold">H2</span>} />
+            <ToolbarButton onClick={handleH3} title="見出し3" label={<span className="text-xs font-bold">H3</span>} />
+            <div className="w-px h-4 bg-gray-200 mx-1" />
+            <ToolbarButton onClick={handleBullet} title="箇条書き" label={
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="2" cy="4" r="1.2" fill="currentColor"/><rect x="5" y="3.2" width="9" height="1.5" rx="0.75" fill="currentColor"/><circle cx="2" cy="8" r="1.2" fill="currentColor"/><rect x="5" y="7.2" width="9" height="1.5" rx="0.75" fill="currentColor"/><circle cx="2" cy="12" r="1.2" fill="currentColor"/><rect x="5" y="11.2" width="9" height="1.5" rx="0.75" fill="currentColor"/></svg>
+            } />
+            <ToolbarButton onClick={handleNumbered} title="番号付きリスト" label={
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><text x="0" y="5" fontSize="5" fill="currentColor" fontWeight="bold">1.</text><rect x="5" y="3.2" width="9" height="1.5" rx="0.75" fill="currentColor"/><text x="0" y="9" fontSize="5" fill="currentColor" fontWeight="bold">2.</text><rect x="5" y="7.2" width="9" height="1.5" rx="0.75" fill="currentColor"/><text x="0" y="13" fontSize="5" fill="currentColor" fontWeight="bold">3.</text><rect x="5" y="11.2" width="9" height="1.5" rx="0.75" fill="currentColor"/></svg>
+            } />
+            <ToolbarButton onClick={handleQuote} title="引用" label={
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="2" height="9" rx="1" fill="currentColor"/><rect x="5" y="4" width="9" height="1.4" rx="0.7" fill="currentColor"/><rect x="5" y="7" width="8" height="1.4" rx="0.7" fill="currentColor"/><rect x="5" y="10" width="7" height="1.4" rx="0.7" fill="currentColor"/></svg>
+            } />
+            <ToolbarButton onClick={handleHr} title="区切り線" label={
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="6.5" width="13" height="2" rx="1" fill="currentColor"/></svg>
+            } />
+            <ToolbarButton onClick={handleLink} title="リンク" label={
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M5.5 9.5l4-4M3 8.5L2 9.5a2.83 2.83 0 004 4l1-1M12 6.5l1-1a2.83 2.83 0 00-4-4l-1 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+            } />
+            <ToolbarButton
+              onClick={() => imageInputRef.current?.click()}
+              title="画像を挿入"
+              label={
+                uploading
+                  ? <span className="text-xs">…</span>
+                  : <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="2" width="13" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><circle cx="5" cy="6" r="1.3" fill="currentColor"/><path d="M1 10l3.5-3 2.5 2.5 2-2 4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              }
+            />
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageInsert(f) }}
+            />
+            <div className="flex-1" />
+            <button
+              type="button"
+              onClick={() => setBilingualMode((v) => !v)}
+              className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                bilingualMode
+                  ? 'bg-gray-900 text-white border-gray-900'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+              }`}
+            >
+              {bilingualMode ? '両言語 ON' : '両言語で入力'}
+            </button>
+          </div>
+        )}
 
-        {/* Body */}
-        <textarea
-          ref={bodyRef}
-          value={body}
-          onChange={(e) => { setBody(e.target.value); autoResize() }}
-          onKeyDown={(e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-              e.preventDefault()
-              handleBold()
-            }
-          }}
-          placeholder="本文を書く..."
-          className="w-full text-gray-800 placeholder-gray-300 border-none outline-none resize-none leading-relaxed text-lg bg-transparent min-h-96"
-          style={{ overflow: 'hidden' }}
-        />
+        {/* Body — edit or preview */}
+        {previewMode ? (
+          <div
+            className="prose prose-gray max-w-none text-gray-800 min-h-96"
+            dangerouslySetInnerHTML={{ __html: previewHtml }}
+          />
+        ) : (
+          <textarea
+            ref={bodyRef}
+            value={body}
+            onChange={(e) => { setBody(e.target.value); autoResize(bodyRef) }}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === 'b') { e.preventDefault(); handleBold() }
+            }}
+            placeholder="本文を書く..."
+            className="w-full text-gray-800 placeholder-gray-300 border-none outline-none resize-none leading-relaxed text-lg bg-transparent min-h-96"
+            style={{ overflow: 'hidden' }}
+          />
+        )}
 
-        {/* Second language fields (bilingual mode) */}
-        {bilingualMode && (
+        {/* Second language (bilingual mode) */}
+        {bilingualMode && !previewMode && (
           <div className="mt-10 pt-8 border-t-2 border-dashed border-gray-200">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-6">
               {originalLang === 'ja' ? '英語（手動入力）' : '日本語（手動入力）'}
@@ -359,15 +464,13 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
               className="w-full text-3xl font-bold text-gray-900 placeholder-gray-300 border-none outline-none resize-none leading-tight mb-6 bg-transparent"
               style={{ overflow: 'hidden' }}
               onInput={(e) => {
-                const el = e.currentTarget
-                el.style.height = 'auto'
-                el.style.height = el.scrollHeight + 'px'
+                const el = e.currentTarget; el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'
               }}
             />
             <textarea
               ref={body2Ref}
               value={body2}
-              onChange={(e) => { setBody2(e.target.value); autoResize2() }}
+              onChange={(e) => { setBody2(e.target.value); autoResize(body2Ref) }}
               placeholder={originalLang === 'ja' ? '本文（英語）...' : '本文（日本語）...'}
               className="w-full text-gray-800 placeholder-gray-300 border-none outline-none resize-none leading-relaxed text-lg bg-transparent min-h-64"
               style={{ overflow: 'hidden' }}
@@ -375,9 +478,9 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
           </div>
         )}
 
-        {/* ── Bottom settings ─────────────────────────────────────── */}
-        <div className="mt-10 pt-6 border-t border-gray-100 flex flex-col gap-4">
-          {/* Notification */}
+        {/* ── Bottom settings ── */}
+        <div className="mt-10 pt-6 border-t border-gray-100 flex flex-col gap-5">
+          {/* Notification checkbox */}
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
@@ -388,7 +491,32 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
             <span className="text-sm text-gray-600">公開時に会員へ通知メールを送る</span>
           </label>
 
-          {/* Translation estimate (hidden in bilingual mode) */}
+          {/* Scheduled publish */}
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-600 shrink-0">スケジュール公開</label>
+            <input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+              className="text-sm border border-gray-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-gray-400 text-gray-700"
+            />
+            {scheduledAt && (
+              <button
+                type="button"
+                onClick={() => submit('scheduled')}
+                disabled={saving}
+                className="px-4 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50"
+              >
+                ⏰ 予約公開
+              </button>
+            )}
+            {scheduledAt && (
+              <button type="button" onClick={() => setScheduledAt('')} className="text-xs text-gray-400 hover:text-gray-600">クリア</button>
+            )}
+          </div>
+
+          {/* Translation estimate */}
           {!bilingualMode && estimate && (
             <div className="flex items-center gap-3 text-sm text-gray-400">
               <span>{estimate.estimated_chars.toLocaleString()}文字</span>
@@ -412,15 +540,7 @@ export function PostForm({ postId, initialData, salons, defaultSalonId, currentB
   )
 }
 
-function ToolbarButton({
-  onClick,
-  title,
-  label,
-}: {
-  onClick: () => void
-  title: string
-  label: React.ReactNode
-}) {
+function ToolbarButton({ onClick, title, label }: { onClick: () => void; title: string; label: React.ReactNode }) {
   return (
     <button
       type="button"
