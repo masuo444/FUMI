@@ -3,6 +3,21 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { PostsListClient } from '@/components/owner/PostsListClient'
 
+async function publishDueScheduledPosts(service: Awaited<ReturnType<typeof import('@/lib/supabase/server').createServiceClient>>) {
+  const now = new Date().toISOString()
+  const { data: due } = await service
+    .from('posts')
+    .select('id')
+    .eq('status', 'scheduled')
+    .lte('scheduled_at', now)
+  if (due && due.length > 0) {
+    await service
+      .from('posts')
+      .update({ status: 'published', published_at: now, scheduled_at: null })
+      .in('id', due.map((p) => p.id))
+  }
+}
+
 export default async function PostsPage({
   searchParams,
 }: {
@@ -10,6 +25,9 @@ export default async function PostsPage({
 }) {
   const { salon: salonId } = await searchParams
   const { owner, service } = await requireOwner()
+
+  // Auto-publish any scheduled posts whose time has passed
+  await publishDueScheduledPosts(service)
 
   const { getAccessibleSalonIds } = await import('@/lib/salon-access')
   const accessibleIds = await getAccessibleSalonIds(service, owner.id)
