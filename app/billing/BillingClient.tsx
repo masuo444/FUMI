@@ -78,10 +78,21 @@ export function BillingClient() {
 
   async function handleUpgrade() {
     setUpgrading(true)
-    const res = await fetch('/api/billing/subscribe', { method: 'POST' })
-    const { url } = await res.json()
-    if (url) window.location.href = url
-    else setUpgrading(false)
+    try {
+      const res = await fetch('/api/billing/subscribe', { method: 'POST' })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        console.error('[billing] no url returned:', data)
+        alert(data.error ?? 'Stripeへの接続に失敗しました。しばらくしてから再試行してください。')
+        setUpgrading(false)
+      }
+    } catch (e) {
+      console.error('[billing] subscribe error:', e)
+      alert('エラーが発生しました。再試行してください。')
+      setUpgrading(false)
+    }
   }
 
   async function handlePortal() {
