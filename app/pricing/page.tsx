@@ -27,13 +27,26 @@ export default async function PricingPage() {
       {/* ── Hero ── */}
       <section className="pt-36 pb-20 px-8 text-center">
         <div className="max-w-3xl mx-auto">
+          {/* Owner badge */}
+          <div className="inline-flex items-center gap-2 bg-[#111] text-white text-xs font-semibold px-4 py-2 rounded-full mb-8">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 1L7.5 4.5H11L8.25 6.75L9.25 10.5L6 8.5L2.75 10.5L3.75 6.75L1 4.5H4.5L6 1Z" fill="white"/>
+            </svg>
+            <span>{lang === 'ja' ? 'チャンネルオーナー向けプラン' : 'Plan for channel owners'}</span>
+          </div>
           <p className="text-xs font-semibold tracking-[0.4em] uppercase text-[#AAA] mb-6">
             {tx(T.pricing.label, lang)}
           </p>
           <h1 className="text-5xl sm:text-6xl font-bold tracking-[-0.03em] mb-6 text-[#111]">
             {tx(T.pricing.title, lang)}
           </h1>
-          <p className="text-lg text-[#888]">{tx(T.pricing.trialNote, lang)}</p>
+          <p className="text-lg text-[#888] mb-4">{tx(T.pricing.trialNote, lang)}</p>
+          {/* Member note */}
+          <p className="inline-block text-xs text-[#AAA] bg-[#F5F5F5] border border-[#EBEBEB] rounded-full px-4 py-2">
+            {lang === 'ja'
+              ? '会員として参加する方への料金は発生しません'
+              : 'Members who join channels are never charged by Fumi'}
+          </p>
         </div>
       </section>
 
@@ -43,7 +56,10 @@ export default async function PricingPage() {
 
           {/* Price header */}
           <div className="bg-[#111] text-white px-12 py-14 text-center">
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-white/40 mb-6">Pro</p>
+            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-white/40 mb-2">Pro</p>
+            <p className="text-xs text-white/30 mb-6">
+              {lang === 'ja' ? 'チャンネルオーナー用' : 'For channel owners & creators'}
+            </p>
             <div className="flex items-end justify-center gap-2 mb-3">
               <span className="text-8xl font-bold leading-none">$10</span>
               <span className="text-white/40 text-lg mb-3">/ {lang === 'ja' ? '月' : 'mo'}</span>
@@ -97,11 +113,13 @@ export default async function PricingPage() {
           </h2>
           <div className="space-y-8">
             {(lang === 'ja' ? [
+              { q: 'このプランは誰向けですか？', a: 'チャンネルを開設して記事を配信したいオーナー・クリエイター向けです。チャンネルに参加する会員にはFumiからの料金は発生しません。' },
               { q: 'トライアル期間中はどこまで使えますか？', a: '記事の公開・メール配信がご利用いただけます。AI自動翻訳はProプランで有効になります。' },
               { q: '会員数・チャンネル数に上限はありますか？', a: 'ありません。何チャンネルでも、何人でも追加できます。' },
               { q: 'いつでも解約できますか？', a: 'はい。解約はいつでも可能で、次の更新日から停止されます。違約金はありません。' },
               { q: '海外の会員に対応できますか？', a: 'はい。AI翻訳で記事を自動翻訳し、各会員の言語でメルマガをお届けします。' },
             ] : [
+              { q: 'Who is this plan for?', a: 'This plan is for owners and creators who want to run a channel and send newsletters. Members who join your channel are never charged by Fumi.' },
               { q: 'What can I do during the free trial?', a: 'You can publish posts and send email notifications. AI translation is enabled on the Pro plan.' },
               { q: 'Is there a limit on members or channels?', a: 'No. Add as many channels and members as you need.' },
               { q: 'Can I cancel anytime?', a: "Yes, cancel anytime. Your plan will stop at the next renewal date. No penalties." },
