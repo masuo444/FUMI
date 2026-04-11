@@ -55,7 +55,6 @@ export const lp = {
       { ja: '会員数・チャンネル数 無制限',       en: 'Unlimited members & channels' },
       { ja: '多言語メルマガ配信',              en: 'Multi-language newsletter delivery' },
       { ja: '自動翻訳（あらゆる言語に対応）',  en: 'Auto-translation (any language)' },
-      { ja: 'Stripe自動会員追加Webhook',       en: 'Stripe auto-member-add webhook' },
       { ja: 'いつでもキャンセル可能',          en: 'Cancel anytime' },
     ],
     cta: { ja: '無料トライアルを始める →', en: 'Start free trial →' },
