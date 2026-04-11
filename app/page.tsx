@@ -54,6 +54,12 @@ const FIXED_SALONS = [
 
 const FIXED_NAMES = FIXED_SALONS.map((s) => s.name)
 
+const MARQUEE_ITEMS = [
+  'Newsletter', 'AI Translation', 'Multi-language', 'Global Delivery',
+  'Members Only', 'Auto-translate', 'Newsletter', 'AI Translation',
+  'Multi-language', 'Global Delivery', 'Members Only', 'Auto-translate',
+]
+
 export default async function Home() {
   const [lang, supabaseResult] = await Promise.all([
     getLang(),
@@ -72,17 +78,26 @@ export default async function Home() {
   const T = lp
 
   return (
-    <div className="min-h-screen bg-white text-[#111]">
+    <div className="min-h-screen bg-white text-[#0a0a0a]">
 
       {/* ── Header ── */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-[#F0F0F0]">
-        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
-          <span className="text-lg font-bold tracking-tight">Fumi</span>
-          <nav className="flex items-center gap-7 text-sm">
-            <a href="#how" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.how, lang)}</a>
-            <a href="#channels" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.channels, lang)}</a>
-            <Link href="/pricing" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.pricing, lang)}</Link>
-            <Link href="/login" className="px-5 py-2.5 text-sm font-semibold bg-[#111] text-white hover:bg-[#333] transition-colors rounded-full">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#ebebeb]">
+        <div className="max-w-[1400px] mx-auto px-8 lg:px-12 h-[62px] flex items-center justify-between">
+          <span className="text-[15px] font-black tracking-[0.04em] text-[#0a0a0a]">Fumi</span>
+          <nav className="flex items-center gap-7 text-[13px]">
+            <a href="#how" className="hidden md:block text-[#aaa] hover:text-[#0a0a0a] transition-colors duration-200">
+              {tx(T.nav.how, lang)}
+            </a>
+            <a href="#channels" className="hidden md:block text-[#aaa] hover:text-[#0a0a0a] transition-colors duration-200">
+              {tx(T.nav.channels, lang)}
+            </a>
+            <Link href="/pricing" className="hidden md:block text-[#aaa] hover:text-[#0a0a0a] transition-colors duration-200">
+              {tx(T.nav.pricing, lang)}
+            </Link>
+            <Link href="/login" className="text-[#aaa] hover:text-[#0a0a0a] transition-colors duration-200">
+              {tx(T.nav.signin, lang)}
+            </Link>
+            <Link href="/login" className="px-5 py-2 text-[12px] font-bold bg-[#0a0a0a] text-white hover:bg-[#333] transition-colors rounded-full">
               {tx(T.nav.start, lang)}
             </Link>
             <LanguageToggle lang={lang} />
@@ -91,60 +106,100 @@ export default async function Home() {
       </header>
 
       {/* ── Hero ── */}
-      <section className="pt-36 pb-28 px-8">
-        <div className="max-w-7xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.4em] uppercase text-[#AAA] mb-8">
+      <section className="pt-[140px] pb-24 px-8 lg:px-12">
+        <div className="max-w-[1400px] mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.6em] uppercase text-[#ccc] mb-10">
             {tx(T.hero.label, lang)}
           </p>
-          <h1 className="text-6xl sm:text-8xl font-bold leading-[1.0] tracking-[-0.03em] mb-8 max-w-4xl whitespace-pre-line text-[#111]">
+          <h1 className="text-[76px] sm:text-[110px] lg:text-[136px] font-black leading-[0.88] tracking-[-0.04em] text-[#0a0a0a] whitespace-pre-line mb-12">
             {tx(T.hero.title, lang)}
           </h1>
-          <p className="text-lg text-[#888] leading-relaxed max-w-xl mb-12 whitespace-pre-line">
-            {tx(T.hero.sub, lang)}
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/login" className="px-8 py-4 text-sm font-semibold bg-[#111] text-white hover:bg-[#333] transition-colors rounded-full">
-              {tx(T.hero.ctaTrial, lang)}
-            </Link>
+          <div className="border-t border-[#ebebeb] pt-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+            <p className="text-[15px] text-[#777] leading-[1.85] max-w-[500px] whitespace-pre-line">
+              {tx(T.hero.sub, lang)}
+            </p>
+            <div className="flex flex-wrap gap-3 shrink-0">
+              <Link href="/login" className="px-7 py-3 text-[13px] font-semibold bg-[#0a0a0a] text-white hover:bg-[#333] transition-colors rounded-full">
+                {tx(T.hero.ctaTrial, lang)}
+              </Link>
+              <Link href="/pricing" className="px-7 py-3 text-[13px] font-semibold border border-[#ddd] text-[#666] hover:border-[#999] hover:text-[#0a0a0a] transition-colors rounded-full">
+                {tx(T.nav.pricing, lang)}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* ── Marquee ── */}
+      <div className="bg-[#0a0a0a] py-3.5 overflow-hidden">
+        <div className="flex animate-marquee">
+          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
+            <span key={i} className="flex items-center shrink-0">
+              <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-white/25 px-5">{item}</span>
+              <span className="text-white/10 text-[10px]">·</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* ── How it works ── */}
-      <section id="how" className="border-t border-[#F0F0F0] bg-[#F8F8F8]">
-        <div className="max-w-7xl mx-auto px-8 py-28">
-          <div className="mb-16">
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.how.label, lang)}</p>
-            <h2 className="text-4xl font-bold tracking-tight text-[#111]">{tx(T.how.title, lang)}</h2>
+      <section id="how" className="py-32 px-8 lg:px-12">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex items-end justify-between pb-10 mb-16 border-b border-[#ebebeb]">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.5em] uppercase text-[#ccc] mb-3">
+                {tx(T.how.label, lang)}
+              </p>
+              <h2 className="text-[34px] font-bold tracking-[-0.02em] text-[#0a0a0a]">
+                {tx(T.how.title, lang)}
+              </h2>
+            </div>
           </div>
-          <div className="grid sm:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#ebebeb]">
             {T.how.steps.map((item, i) => (
-              <div key={item.step}>
-                <div className="w-10 h-10 rounded-full bg-white border border-[#E8E8E8] flex items-center justify-center text-xs font-bold text-[#AAA] mb-6">
+              <div key={item.step} className="px-0 sm:px-10 first:pl-0 last:pr-0 py-10 sm:py-0">
+                <p className="text-[80px] font-black text-[#f2f2f2] leading-none mb-6 tracking-tighter">
                   {String(i + 1).padStart(2, '0')}
-                </div>
-                <h3 className="text-xl font-bold text-[#111] mb-3">{tx(item.title, lang)}</h3>
-                <p className="text-sm text-[#888] leading-relaxed">{tx(item.body, lang)}</p>
+                </p>
+                <h3 className="text-[17px] font-bold text-[#0a0a0a] mb-3 tracking-tight">
+                  {tx(item.title, lang)}
+                </h3>
+                <p className="text-[13px] text-[#888] leading-relaxed">
+                  {tx(item.body, lang)}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── For who ── */}
-      <section className="border-t border-[#F0F0F0]">
-        <div className="max-w-7xl mx-auto px-8 py-28">
+      {/* ── For Who ── */}
+      <section className="bg-[#f7f7f7] border-t border-[#ebebeb] py-32 px-8 lg:px-12">
+        <div className="max-w-[1400px] mx-auto">
           <div className="mb-16">
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.forWho.label, lang)}</p>
-            <h2 className="text-4xl font-bold tracking-tight text-[#111]">{tx(T.forWho.title, lang)}</h2>
+            <p className="text-[10px] font-bold tracking-[0.5em] uppercase text-[#ccc] mb-3">
+              {tx(T.forWho.label, lang)}
+            </p>
+            <h2 className="text-[34px] font-bold tracking-[-0.02em] text-[#0a0a0a]">
+              {tx(T.forWho.title, lang)}
+            </h2>
           </div>
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-2 gap-4">
             {T.forWho.cards.map((card) => (
-              <div key={card.label.ja} className="bg-[#F8F8F8] border border-[#EBEBEB] p-10 rounded-2xl">
-                <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-[#BBB] mb-6">{tx(card.label, lang)}</p>
-                <h3 className="text-xl font-bold text-[#111] mb-4 leading-snug">{tx(card.title, lang)}</h3>
-                <p className="text-sm text-[#888] leading-relaxed mb-6">{tx(card.body, lang)}</p>
-                <p className="text-xs text-[#BBB] leading-relaxed">{tx(card.examples, lang)}</p>
+              <div key={card.label.ja}
+                className="bg-white border border-[#ebebeb] rounded-2xl p-10 hover:border-[#d0d0d0] hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-all duration-300">
+                <p className="text-[10px] font-bold tracking-[0.45em] uppercase text-[#ccc] mb-6">
+                  {tx(card.label, lang)}
+                </p>
+                <h3 className="text-[22px] font-bold text-[#0a0a0a] mb-4 leading-snug tracking-tight">
+                  {tx(card.title, lang)}
+                </h3>
+                <p className="text-[13px] text-[#777] leading-relaxed mb-5">
+                  {tx(card.body, lang)}
+                </p>
+                <p className="text-[11px] text-[#bbb] leading-relaxed border-t border-[#f0f0f0] pt-4">
+                  {tx(card.examples, lang)}
+                </p>
               </div>
             ))}
           </div>
@@ -152,32 +207,42 @@ export default async function Home() {
       </section>
 
       {/* ── Channels ── */}
-      <section id="channels" className="border-t border-[#F0F0F0] bg-[#F8F8F8]">
-        <div className="max-w-7xl mx-auto px-8 py-28">
-          <div className="mb-16">
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#AAA] mb-4">{tx(T.channels.label, lang)}</p>
-            <h2 className="text-4xl font-bold tracking-tight text-[#111]">{tx(T.channels.title, lang)}</h2>
+      <section id="channels" className="border-t border-[#ebebeb] py-32 px-8 lg:px-12">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex items-end justify-between pb-10 mb-16 border-b border-[#ebebeb]">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.5em] uppercase text-[#ccc] mb-3">
+                {tx(T.channels.label, lang)}
+              </p>
+              <h2 className="text-[34px] font-bold tracking-[-0.02em] text-[#0a0a0a]">
+                {tx(T.channels.title, lang)}
+              </h2>
+            </div>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {fixedWithImages.map((salon) => (
               <Link key={salon.key} href={salon.href}
-                className="group block rounded-2xl overflow-hidden border border-[#EBEBEB] bg-white hover:border-[#CCC] hover:shadow-xl transition-all duration-300">
-                <div className="relative h-48 overflow-hidden">
+                className="group block rounded-xl overflow-hidden border border-[#ebebeb] bg-white hover:border-[#ccc] hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)] transition-all duration-300">
+                <div className="relative h-52 overflow-hidden">
                   {salon.image ? (
                     <Image src={salon.image} alt={salon.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center" style={{ background: salon.fallbackBg }}>
-                      <span className="font-bold text-2xl tracking-widest select-none" style={{ color: salon.fallbackColor }}>
+                      <span className="font-black text-xl tracking-widest select-none" style={{ color: salon.fallbackColor }}>
                         {salon.fallbackText}
                       </span>
                     </div>
                   )}
                 </div>
-                <div className="p-6">
-                  <p className="text-[10px] font-semibold tracking-[0.25em] uppercase text-[#BBB] mb-2">{tx(salon.tagline, lang)}</p>
-                  <h3 className="text-sm font-bold text-[#111] leading-snug mb-2">{salon.name}</h3>
-                  <p className="text-xs text-[#999] leading-relaxed line-clamp-2">{tx(salon.description, lang)}</p>
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[#111]">
+                <div className="p-5">
+                  <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-[#ccc] mb-1.5">
+                    {tx(salon.tagline, lang)}
+                  </p>
+                  <h3 className="text-[13px] font-bold text-[#0a0a0a] leading-snug mb-2">{salon.name}</h3>
+                  <p className="text-[12px] text-[#aaa] leading-relaxed line-clamp-2">
+                    {tx(salon.description, lang)}
+                  </p>
+                  <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-[#0a0a0a]">
                     <span>{lang === 'ja' ? '詳しく見る' : 'Learn more'}</span>
                     <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
@@ -185,21 +250,27 @@ export default async function Home() {
               </Link>
             ))}
             {dynamicSalons.map((salon, i) => {
-              const bgs = ['linear-gradient(135deg,#1e1e2e,#2d2b55)', 'linear-gradient(135deg,#1a2035,#243050)', 'linear-gradient(135deg,#1e2a1e,#2a402a)']
+              const bgs = [
+                'linear-gradient(135deg,#1e1e2e,#2d2b55)',
+                'linear-gradient(135deg,#1a2035,#243050)',
+                'linear-gradient(135deg,#1e2a1e,#2a402a)',
+              ]
               return (
                 <Link key={salon.id} href={`/salon/${salon.id}`}
-                  className="group block rounded-2xl overflow-hidden border border-[#EBEBEB] bg-white hover:border-[#CCC] hover:shadow-xl transition-all duration-300">
-                  <div className="relative h-48 flex items-center justify-center" style={{ background: bgs[i % bgs.length] }}>
+                  className="group block rounded-xl overflow-hidden border border-[#ebebeb] bg-white hover:border-[#ccc] hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)] transition-all duration-300">
+                  <div className="relative h-52 flex items-center justify-center" style={{ background: bgs[i % bgs.length] }}>
                     {salon.hero_image_url ? (
                       <Image src={salon.hero_image_url} alt={salon.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <span className="font-bold text-3xl text-white/50 select-none">{salon.name.slice(0, 2)}</span>
+                      <span className="font-black text-3xl text-white/30 select-none">{salon.name.slice(0, 2)}</span>
                     )}
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-sm font-bold text-[#111] mb-2">{salon.name}</h3>
-                    {salon.description && <p className="text-xs text-[#999] line-clamp-2">{salon.description}</p>}
-                    <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[#111]">
+                  <div className="p-5">
+                    <h3 className="text-[13px] font-bold text-[#0a0a0a] mb-2">{salon.name}</h3>
+                    {salon.description && (
+                      <p className="text-[12px] text-[#aaa] line-clamp-2">{salon.description}</p>
+                    )}
+                    <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-[#0a0a0a]">
                       <span>{lang === 'ja' ? '詳しく見る' : 'Learn more'}</span>
                       <span className="group-hover:translate-x-1 transition-transform">→</span>
                     </div>
@@ -212,15 +283,19 @@ export default async function Home() {
       </section>
 
       {/* ── Bottom CTA ── */}
-      <section className="bg-[#111] text-white">
-        <div className="max-w-7xl mx-auto px-8 py-32 text-center">
-          <h2 className="text-5xl sm:text-7xl font-bold tracking-[-0.03em] mb-6">{tx(T.bottomCta.title, lang)}</h2>
-          <p className="text-base text-white/40 mb-10">{tx(T.bottomCta.sub, lang)}</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/login" className="px-10 py-4 text-sm font-semibold bg-white text-[#111] hover:bg-[#F0F0F0] transition-colors rounded-full">
+      <section className="bg-[#0a0a0a] text-white">
+        <div className="max-w-[1400px] mx-auto px-8 lg:px-12 py-36 text-center">
+          <p className="text-[10px] font-bold tracking-[0.5em] uppercase text-white/25 mb-8">
+            {tx(T.bottomCta.sub, lang)}
+          </p>
+          <h2 className="text-[52px] sm:text-[80px] font-black tracking-[-0.04em] leading-[0.9] mb-14 whitespace-pre-line">
+            {tx(T.bottomCta.title, lang)}
+          </h2>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/login" className="px-10 py-3.5 text-[13px] font-semibold bg-white text-[#0a0a0a] hover:bg-[#f0f0f0] transition-colors rounded-full">
               {tx(T.bottomCta.button, lang)}
             </Link>
-            <Link href="/pricing" className="px-10 py-4 text-sm font-semibold border border-white/20 text-white/60 hover:border-white/40 hover:text-white transition-colors rounded-full">
+            <Link href="/pricing" className="px-10 py-3.5 text-[13px] font-semibold border border-white/20 text-white/50 hover:border-white/50 hover:text-white transition-colors rounded-full">
               {tx(T.nav.pricing, lang)}
             </Link>
           </div>
@@ -228,19 +303,20 @@ export default async function Home() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-[#111] text-white border-t border-white/[0.08]">
-        <div className="max-w-7xl mx-auto px-8 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <footer className="bg-[#0a0a0a] border-t border-white/[0.06] text-white">
+        <div className="max-w-[1400px] mx-auto px-8 lg:px-12 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
-            <span className="font-bold block mb-1">Fumi</span>
-            <span className="text-white/25 text-xs">{tx(T.footer.tagline, lang)}</span>
+            <span className="font-black text-[15px] block mb-1">Fumi</span>
+            <span className="text-white/25 text-[11px]">{tx(T.footer.tagline, lang)}</span>
           </div>
-          <div className="flex gap-8 text-sm text-white/40">
+          <div className="flex gap-8 text-[12px] text-white/30">
             <Link href="/login" className="hover:text-white transition-colors">{tx(T.footer.ownerLogin, lang)}</Link>
             <Link href="/pricing" className="hover:text-white transition-colors">{tx(T.nav.pricing, lang)}</Link>
           </div>
-          <span className="text-white/20 text-xs">© 2026 Fumi</span>
+          <span className="text-white/20 text-[11px]">© 2026 Fumi</span>
         </div>
       </footer>
+
     </div>
   )
 }
