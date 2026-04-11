@@ -15,7 +15,6 @@ export default async function PricingPage() {
         <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
           <Link href="/" className="text-lg font-bold tracking-tight hover:opacity-70 transition-opacity">Fumi</Link>
           <div className="flex items-center gap-6">
-            <Link href="/my/login" className="text-sm text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.signin, lang)}</Link>
             <Link href="/login" className="px-5 py-2.5 text-sm font-semibold bg-[#111] text-white hover:bg-[#333] transition-colors rounded-full">
               {tx(T.nav.start, lang)}
             </Link>
@@ -150,7 +149,6 @@ export default async function PricingPage() {
         <div className="max-w-7xl mx-auto px-8 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <Link href="/" className="font-bold hover:opacity-70 transition-opacity">Fumi</Link>
           <div className="flex gap-8 text-sm text-white/40">
-            <Link href="/my/login" className="hover:text-white transition-colors">{tx(T.footer.memberLogin, lang)}</Link>
             <Link href="/login" className="hover:text-white transition-colors">{tx(T.footer.ownerLogin, lang)}</Link>
           </div>
           <span className="text-white/20 text-xs">© 2026 Fumi</span>

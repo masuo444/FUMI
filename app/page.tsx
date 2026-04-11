@@ -82,7 +82,6 @@ export default async function Home() {
             <a href="#how" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.how, lang)}</a>
             <a href="#channels" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.channels, lang)}</a>
             <Link href="/pricing" className="hidden md:block text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.pricing, lang)}</Link>
-            <Link href="/my/login" className="text-[#888] hover:text-[#111] transition-colors">{tx(T.nav.signin, lang)}</Link>
             <Link href="/login" className="px-5 py-2.5 text-sm font-semibold bg-[#111] text-white hover:bg-[#333] transition-colors rounded-full">
               {tx(T.nav.start, lang)}
             </Link>
@@ -106,9 +105,6 @@ export default async function Home() {
           <div className="flex flex-wrap gap-4">
             <Link href="/login" className="px-8 py-4 text-sm font-semibold bg-[#111] text-white hover:bg-[#333] transition-colors rounded-full">
               {tx(T.hero.ctaTrial, lang)}
-            </Link>
-            <Link href="/my/login" className="px-8 py-4 text-sm font-semibold border border-[#DDD] text-[#555] hover:border-[#999] hover:text-[#111] transition-colors rounded-full">
-              {tx(T.hero.ctaMember, lang)}
             </Link>
           </div>
         </div>
@@ -239,7 +235,6 @@ export default async function Home() {
             <span className="text-white/25 text-xs">{tx(T.footer.tagline, lang)}</span>
           </div>
           <div className="flex gap-8 text-sm text-white/40">
-            <Link href="/my/login" className="hover:text-white transition-colors">{tx(T.footer.memberLogin, lang)}</Link>
             <Link href="/login" className="hover:text-white transition-colors">{tx(T.footer.ownerLogin, lang)}</Link>
             <Link href="/pricing" className="hover:text-white transition-colors">{tx(T.nav.pricing, lang)}</Link>
           </div>
